@@ -21,7 +21,11 @@ Airtable.configure({
 const base = Airtable.base(process.env.AIRTABLE_BASE_ID);
 
 app.get("/", (req, res) => {
-    res.send("Hello World!");
+    res.send("Root route");
+});
+
+app.get("fields", (req, res) => {
+    
 });
 
 // Get post request and then fill out airtable forms
