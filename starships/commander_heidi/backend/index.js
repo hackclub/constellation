@@ -2,21 +2,24 @@ const express = require('express')
 const app = express()
 const port = 3000
 
-const City = "Shelburne"
-const State = "VT"
-const Country = "US"
-const Extra = "test message!"
+const city = "Shelburne"
+const state = "VT"
+const country = "US"
+const slack_id = "U06PR6B8D37"
+const extra = "extra info! this isn't going to be used in the submission"
 
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
 })
 
-app.get('/test', (req, res) => {
+app.get('/api', (req, res) => {
     res.json({
-        City,
-        State,
-        Country,
+        city,
+        state,
+        country,
+        slack_id,
+        extra
     })
 })
 
