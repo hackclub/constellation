@@ -51,23 +51,52 @@ const Scene: React.FC = () => {
 
         mount.appendChild(renderer.domElement);
 
-        let gltfModel: THREE.Group = null;
-        let shipModels: THREE.Group[] = [];
+
+        const shipModels: THREE.Object3D[] = [];
         // GLTF Loading
-        const loader = new GLTFLoader();
+        const manager = new THREE.LoadingManager()
+        const loader = new GLTFLoader(manager);
 
         const loadStarships = async () => {
             const data = await fetch("http://localhost:6969/starships").then(
                 (ships) => ships.json()
             );
+
+            manager.onLoad = () => {
+                console.log("All models loaded!");
+    
+                const numModels = shipModels.length;  // Number of models loaded
+                const radius = 10; // Radius of the circle
+                const angleStep = (2 * Math.PI) / numModels;  // Angle step to distribute models evenly
+            
+                // Calculate and set positions for each model in the array
+                for (let i = 0; i < numModels; i++) {
+                    const model = shipModels[i];
+            
+                    // Calculate the position for each model inside the onLoad callback
+                    const angle = i * angleStep;
+                    const x = radius * Math.cos(angle); // X position using cosine
+                    const z = radius * Math.sin(angle); // Z position using sine
+            
+                    model.position.set(x, 0, z); // Set position (y is kept as 0)
+                    scene.add(model); // Add the model to the scene after positioning
+                    console.log(`Model ${i + 1} positioned at:`, model.position);
+                }
+            };
+
 // some bumfuckery here
-            data.starships.forEach((starship) => {
+            // console.log(data.starships.length);
+            for (let i = 0; i < data.starships.length; i++) {
+                console.log(i);
                 // console.log(starship);
                 loader.load(
                     "/3D_Assets/mothership.gltf", // Ensure this path is correct
                     (gltf) => {
-                        shipModels.push(gltf.scene); // Store the loaded modes
-                        scene.add(shipModels);
+                        const model = gltf.scene
+                        console.log("loading new model!!")
+                        model.scale.set(5, 2, 2); // Adjust scale if necessary
+                        model.position.set(2, 0, 0); // Adjust position if necessary
+                        shipModels.push(model); // Store the loaded modes
                         console.log("Mothership loaded successfully");
                     },
                     (xhr) => {
@@ -78,8 +107,8 @@ const Scene: React.FC = () => {
                     (error) => {
                         console.error("An error happened", error);
                     }
-                );
-            });
+                )
+            };
         };
 
         loadStarships();
@@ -95,7 +124,7 @@ const Scene: React.FC = () => {
 
         // Background Texture
         const spaceTexture = new THREE.TextureLoader().load(
-            "https://images.unsplash.com/photo-1557683316-973673baf926"
+            "/constellation-background.png"
         );
         scene.background = spaceTexture;
 
@@ -124,10 +153,13 @@ const Scene: React.FC = () => {
             refCube.rotation.y += 0.01;
 
             // Rotate the GLTF model (if it has been loaded)
-            if (shipModels[0]) {
-                shipModels[0].rotation.x += 0.01;
+            if (shipModels) {
+                for (let i = 0; i < shipModels.length; i++) {
+                    shipModels[i].rotation.y += 0.01;
+                }
                 // gltfModel.rotation.y += 0.01;
             }
+
             // controls.update();
             renderer.render(scene, camera);
         };
