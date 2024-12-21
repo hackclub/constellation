@@ -136,6 +136,7 @@ const Scene: React.FC = () => {
             pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
         }
 
+        let previousIntersected = [];
         // Set up animation
         const animate = () => {
             // update the picking ray with the camera and pointer position
@@ -144,9 +145,18 @@ const Scene: React.FC = () => {
             // calculate objects intersecting the picking ray
             const intersects = raycaster.intersectObjects(scene.children);
 
+            for (let i = 0; i < previousIntersected.length; i++) {
+                // Reset the color of objects that are no longer intersected
+                if (!intersects.includes(previousIntersected[i])) {
+                    previousIntersected[i].material.color.set(0xffffff); // Set back to original color
+                }
+            }
+
             for (let i = 0; i < intersects.length; i++) {
                 intersects[i].object.material.color.set(0xff0000);
             }
+
+            previousIntersected = intersects.map(intersect => intersect.object);
 
             // Rotate the reference cube
             refCube.rotation.x += 0.01;
